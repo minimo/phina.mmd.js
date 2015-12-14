@@ -23,7 +23,7 @@ phina.define('MainScene', {
       zNear: 0.1,
       zFar: 300.0
     });
-    layer.scene.add( camera );
+    layer.scene.add(camera);
 
     var objLoader = GLBoost.ObjLoader.getInstance();
     var promise = objLoader.loadObj('assets/_teapot/teapot.obj', layer.canvas);
