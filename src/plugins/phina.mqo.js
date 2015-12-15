@@ -27,6 +27,10 @@ phina.namespace(function() {
             };
             req.send(null);
         },
+
+        getMesh: function(canvas) {
+            return this.model.convert(canvas);
+        }
     });
 
     /*
@@ -47,7 +51,6 @@ phina.namespace(function() {
             this._rawMeshes = [];
             this._rawMaterials = null;
             this.parse(data);
-//            this.convert();
         },
 
         parse: function(data) {
@@ -63,7 +66,7 @@ phina.namespace(function() {
             }
         },
 
-        convert: function(canvas){1
+        convert: function(canvas){
             this.meshes = [];
             for (var i = 0, len = this._rawMeshes.length; i < len; i++) {
                 var mesh = this._rawMeshes[i];
@@ -72,6 +75,7 @@ phina.namespace(function() {
                     this.meshes.push(list[j]);
                 }
             }
+            return this.meshes;
         },
     });
 
@@ -130,7 +134,7 @@ phina.namespace(function() {
             this._parseFaces( RegExp.$1, RegExp.$2 );
         },
 
-        convert: function(materials){
+        convert: function(materials, canvas){
             //不可視設定の場合は処理をスキップ
             if( this.visible == 0 ){
                 return [];  //空の配列を返す
@@ -148,14 +152,14 @@ phina.namespace(function() {
             }
 
             //使用マテリアルに応じてオブジェクトを分割変換
-            var build = null;
+            this.build = null;
 //            if (THREE) build = this.buildTHREE;
-            if (GLBoost !== undefined) build = this.buildGLB;
+            if (GLBoost !== undefined) this.build = this.buildGLB;
 
             var meshList = []
             for (var mn = 0; mn < facemat.length; mn++) {
                 var matnum = facemat[mn];
-                var sp = build(matnum, materials.materials[matnum]);
+                var sp = this.build(matnum, materials.materials[matnum], canvas);
                 if (sp) meshList.push(sp);
             }
             return meshList;
@@ -356,73 +360,38 @@ phina.namespace(function() {
             return obj;
         },
 
-        //頂点情報のパース
-        _parseVertices: function(num, text) {
-            var scale = 0.1;
-            var vertexTextList = text.split('\n');
-            for (var i = 0; i <= num; i++) {
-                var vertex = vertexTextList[i].split(' ');
-                if (vertex.length < 3)continue;
-                var v = {};
-                v.x = Number(vertex[0])*scale;
-                v.y = Number(vertex[1])*scale;
-                v.z = Number(vertex[2])*scale;
-                this.vertices.push(v);
-            }
-
-            //ミラーリング対応
-            if (this.mirror) {
-                var self = this;
-                var toMirror = (function(){
-                    return {
-                        1: function(v) { return [ v[0]*-1, v[1], v[2] ]; },
-                        2: function(v) { return [ v[0], v[1]*-1, v[2] ]; },
-                        4: function(v) { return [ v[0], v[1], v[2]*-1 ]; },
-                    }[self.mirrorAxis];
-                })();
-                var len = this.vertices.length;
-                for (var i = 0; i < len; i++) {
-                    this.vertices.push(toMirror(this.vertices[i]));
-                }
-            }
-        },
-
         /*
          * フェース情報からマテリアルに対応した頂点情報を構築
          * GLBoost形式専用
          */
-        buildGLB: function(num, mqoMat) {
+        buildGLB: function(num, mqoMat, canvas) {
             //マテリアル情報
             var mat = null;
             if (mqoMat) {
-                mat = new GLBoost.ClassicMaterial();
+                mat = new GLBoost.ClassicMaterial(canvas);
+                mat.shader = new GLBoost.PhongShader(canvas);
+
                 var r = mqoMat.col[0];
                 var g = mqoMat.col[1];
                 var b = mqoMat.col[2];
-//                if (mat.color) mat.color.setRGB(r*mqoMat.dif, g*mqoMat.dif, b*mqoMat.dif);
-                if (mat.color) mat.color.setRGB(r, g, b);
-                if (mat.emissive) mat.emissive.setRGB(r*mqoMat.emi*0.1, g*mqoMat.emi*0.1, b*mqoMat.emi*0.1);
-                if (mat.ambient) mat.ambient.setRGB(r*mqoMat.amb, g*mqoMat.amb, b*mqoMat.amb);
-                if (mat.specular) mat.specular.setRGB(r*mqoMat.spc, g*mqoMat.spc, b*mqoMat.spc);
+                if (mat.color) mat.diffuseColor = new Vector3(r, g, b);
+                if (mat.ambient) mat.ambientColor = new Vector3(r*mqoMat.amb, g*mqoMat.amb, b*mqoMat.amb);
+                if (mat.specular) mat.specularColor = new Vector3(r*mqoMat.spc, g*mqoMat.spc, b*mqoMat.spc);
                 if (mqoMat.tex) {
-                    mat.map = THREE.ImageUtils.loadTexture(_modelPath+"/"+mqoMat.tex);
+//                    mat.map = THREE.ImageUtils.loadTexture(_modelPath+"/"+mqoMat.tex);
                 }
                 if (mqoMat.aplane) {
-                    mat.alphaMap = THREE.ImageUtils.loadTexture(_modelPath+"/"+mqoMat.aplane);
+//                    mat.alphaMap = THREE.ImageUtils.loadTexture(_modelPath+"/"+mqoMat.aplane);
                 }
-                mat.transparent = true;
-                mat.shiness = mqoMat.power;
-                mat.opacity = mqoMat.col[3];
             } else {
                 //デフォルトマテリアル
-                mat = new THREE.MeshBasicMaterial();
-                mat.color.setRGB(0.7, 0.7, 0.7);
-                mat.transparent = true;
-                mat.shiness = 1.0;
+                mat = new GLBoost.ClassicMaterial(canvas);
+                mat.shader = new GLBoost.PhongShader(canvas);
+                mat.diffuseColor = new Vector3(0.7, 0.7, 0.7);
             }
 
             //ジオメトリ情報
-            var geo = new THREE.Geometry();
+            var geo = new GLBoost.Geometry(canvas);
 
             //頂点情報初期化
             for(var i = 0; i < this.vertices.length; i++) {

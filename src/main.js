@@ -25,14 +25,9 @@ phina.define('MainScene', {
     });
     layer.scene.add(camera);
 
-    var objLoader = GLBoost.ObjLoader.getInstance();
-    var promise = objLoader.loadObj('assets/_teapot/teapot.obj', layer.canvas);
-    promise.then(function(mesh) {
-      console.log(mesh);
-      layer.scene.add(mesh);
-      layer.scene.prepareForRender();
-    });
-
+    var obj = phina.asset.AssetManager.get("mqo", "gradriel");
+    var mesh = obj.getMesh(layer.canvas);
+    layer.scene.add(mesh[0]);
     layer.scene.prepareForRender();
 
     layer.update = function() {
@@ -55,7 +50,7 @@ phina.main(function() {
   var app = phina.game.GameApp({
     assets: {
         mqo: {
-            'test': 'assets/gradriel_pose.mqo',
+            'gradriel': 'assets/gradriel_pose.mqo',
         },
     },
     startLabel: 'main',
