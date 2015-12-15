@@ -53,6 +53,11 @@ phina.define('MainScene', {
 
 phina.main(function() {
   var app = phina.game.GameApp({
+    assets: {
+        mqo: {
+            'test': 'assets/gradriel_pose.mqo',
+        },
+    },
     startLabel: 'main',
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT

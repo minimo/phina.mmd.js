@@ -1,52 +1,38 @@
-(function() {
-    tm.asset = tm.asset || {};
+phina.namespace(function() {
 
-    _modelPath = "";
-
-    tm.define("tm.asset.MQO", {
-        superClass: "tm.event.EventDispatcher",
+    phina.define("phina.asset.MQO", {
+        superClass: "phina.asset.Asset",
 
         model: null,
+        modelPath: "",
 
-        init: function(path) {
+        init: function() {
             this.superInit();
-            this.loadFromURL(path);
         },
 
-        // URLからロード
-        loadFromURL: function(path) {
-            var modelurl = path.split("/");
-            _modelPath = "";
+        _load: function(resolve) {
+            var modelurl = this.src.split("/");
+            this.modelPath = "";
             for (var i = 0, len = modelurl.length; i < len-1; i++) {
-                _modelPath += modelurl[i];
+                this.modelPath += modelurl[i];
             }
 
             var that = this;
             var req = new XMLHttpRequest();
-            req.open("GET", path, true);
+            req.open("GET", this.src, true);
             req.onload = function() {
                 var data = req.responseText;
-                that.loadFromData(data);
+                that.model = phina.MQOModel(data);
+                resolve(that);
             };
             req.send(null);
         },
-
-        //データからロード
-        loadFromData: function(data) {
-            this.model = tm.MQOModel(data);
-            this.flare("load");
-        },
-    });
-
-    //ローダーに拡張子登録
-    tm.asset.Loader.register("mqo", function(path) {
-        return tm.asset.MQO(path);
     });
 
     /*
      * メタセコイアモデル
      */
-    tm.define("tm.MQOModel", {
+    phina.define("phina.MQOModel", {
         //変換後メッシュアレイ
         meshes: [],
 
@@ -61,27 +47,27 @@
             this._rawMeshes = [];
             this._rawMaterials = null;
             this.parse(data);
-            this.convert();
+//            this.convert();
         },
 
         parse: function(data) {
             // マテリアル
             var materialText = data.match(/^Material [\s\S]*?^\}/m);
-            this._rawMaterials = tm.MQOMaterial(materialText[0]);       //マテリアルチャンクは原則一つ
+            this._rawMaterials = phina.MQOMaterial(materialText[0]);       //マテリアルチャンクは原則一つ
 
             // オブジェクト
             var objectText = data.match(/^Object [\s\S]*?^\}/gm);
             for (var i = 0, len = objectText.length; i < len; ++i) {
-                var mesh = tm.MQOMesh(objectText[i]);
+                var mesh = phina.MQOMesh(objectText[i]);
                 this._rawMeshes.push(mesh);
             }
         },
 
-        convert: function(){
+        convert: function(canvas){1
             this.meshes = [];
             for (var i = 0, len = this._rawMeshes.length; i < len; i++) {
                 var mesh = this._rawMeshes[i];
-                var list = mesh.convert(this._rawMaterials);
+                var list = mesh.convert(this._rawMaterials, canvas);
                 for (var j = 0, len2 = list.length; j < len2; j++) {
                     this.meshes.push(list[j]);
                 }
@@ -92,7 +78,7 @@
     /*
      * メタセコイアメッシュ
      */
-    tm.define("tm.MQOMesh", {
+    phina.define("phina.MQOMesh", {
         name: "",   //メッシュ名
 
         vertices: [],   // 頂点
@@ -162,10 +148,14 @@
             }
 
             //使用マテリアルに応じてオブジェクトを分割変換
+            var build = null;
+//            if (THREE) build = this.buildTHREE;
+            if (GLBoost !== undefined) build = this.buildGLB;
+
             var meshList = []
             for (var mn = 0; mn < facemat.length; mn++) {
                 var matnum = facemat[mn];
-                var sp = this.build(matnum, materials.materials[matnum]);
+                var sp = build(matnum, materials.materials[matnum]);
                 if (sp) meshList.push(sp);
             }
             return meshList;
@@ -175,7 +165,7 @@
          * フェース情報からマテリアルに対応した頂点情報を構築
          * THREE形式専用
          */
-        build: function(num, mqoMat) {
+        buildTHREE: function(num, mqoMat) {
             //マテリアル情報
             var mat = null;
             if (mqoMat) {
@@ -356,7 +346,6 @@
                 }
             }
 
-
             //各種情報計算
             geo.computeBoundingBox();
             geo.computeFaceNormals();
@@ -398,6 +387,222 @@
             }
         },
 
+        /*
+         * フェース情報からマテリアルに対応した頂点情報を構築
+         * GLBoost形式専用
+         */
+        buildGLB: function(num, mqoMat) {
+            //マテリアル情報
+            var mat = null;
+            if (mqoMat) {
+                mat = new GLBoost.ClassicMaterial();
+                var r = mqoMat.col[0];
+                var g = mqoMat.col[1];
+                var b = mqoMat.col[2];
+//                if (mat.color) mat.color.setRGB(r*mqoMat.dif, g*mqoMat.dif, b*mqoMat.dif);
+                if (mat.color) mat.color.setRGB(r, g, b);
+                if (mat.emissive) mat.emissive.setRGB(r*mqoMat.emi*0.1, g*mqoMat.emi*0.1, b*mqoMat.emi*0.1);
+                if (mat.ambient) mat.ambient.setRGB(r*mqoMat.amb, g*mqoMat.amb, b*mqoMat.amb);
+                if (mat.specular) mat.specular.setRGB(r*mqoMat.spc, g*mqoMat.spc, b*mqoMat.spc);
+                if (mqoMat.tex) {
+                    mat.map = THREE.ImageUtils.loadTexture(_modelPath+"/"+mqoMat.tex);
+                }
+                if (mqoMat.aplane) {
+                    mat.alphaMap = THREE.ImageUtils.loadTexture(_modelPath+"/"+mqoMat.aplane);
+                }
+                mat.transparent = true;
+                mat.shiness = mqoMat.power;
+                mat.opacity = mqoMat.col[3];
+            } else {
+                //デフォルトマテリアル
+                mat = new THREE.MeshBasicMaterial();
+                mat.color.setRGB(0.7, 0.7, 0.7);
+                mat.transparent = true;
+                mat.shiness = 1.0;
+            }
+
+            //ジオメトリ情報
+            var geo = new THREE.Geometry();
+
+            //頂点情報初期化
+            for(var i = 0; i < this.vertices.length; i++) {
+                this.vertices[i].to = -1;
+            }
+            var countVertex = 0;
+
+            //インデックス情報
+            for (var i = 0, len = this.faces.length; i < len; i++) {
+                var face = this.faces[i];
+                if (face.m != num) continue;
+                if (face.vNum < 3) continue;
+
+                var vIndex = face.v;
+                if (face.vNum == 3) {
+                    //法線
+                    var nx = face.n[0];
+                    var ny = face.n[1];
+                    var nz = face.n[2];
+                    var normal =  new THREE.Vector3(nx, ny, nz);
+
+                    //フェース情報
+                    var index = [];
+                    index[0] = vIndex[2];
+                    index[1] = vIndex[1];
+                    index[2] = vIndex[0];
+                    for (var j = 0; j < 3; j++) {
+                        var v = this.vertices[index[j]];
+                        if (v.to != -1) {
+                            index[j] = v.to;
+                        } else {
+                            v.to = countVertex;
+                            index[j] = v.to;
+                            countVertex++;
+                        }
+                    }
+                    var face3 = new THREE.Face3(index[0], index[1], index[2], normal, undefined, face.m[0]);
+
+                    //頂点法線
+                    face3.vertexNormals.push(normal);
+                    face3.vertexNormals.push(normal);
+                    face3.vertexNormals.push(normal);
+
+                    geo.faces.push(face3);
+
+                    // ＵＶ座標
+                    geo.faceVertexUvs[0].push([
+                        new THREE.Vector2(face.uv[4], 1.0 - face.uv[5]),
+                        new THREE.Vector2(face.uv[2], 1.0 - face.uv[3]),
+                        new THREE.Vector2(face.uv[0], 1.0 - face.uv[1])]);
+                } else if (face.vNum == 4) {
+                    //法線
+                    var nx = face.n[0];
+                    var ny = face.n[1];
+                    var nz = face.n[2];
+                    var normal =  new THREE.Vector3(nx, ny, nz);
+
+                    //四角を三角に分割
+                    {
+                        //フェース情報
+                        var index = [];
+                        index[0] = vIndex[3];
+                        index[1] = vIndex[2];
+                        index[2] = vIndex[1];
+                        for (var j = 0; j < 3; j++) {
+                            var v = this.vertices[index[j]];
+                            if (v.to != -1) {
+                                index[j] = v.to;
+                            } else {
+                                v.to = countVertex;
+                                index[j] = v.to;
+                                countVertex++;
+                            }
+                        }
+                        var face3 = new THREE.Face3(index[0], index[1], index[2], normal, undefined, face.m[0]);
+//                        var face3 = new THREE.Face3(vIndex[3], vIndex[2], vIndex[1], normal, undefined, face.m[0]);
+
+                        //頂点法線
+                        face3.vertexNormals.push(normal);
+                        face3.vertexNormals.push(normal);
+                        face3.vertexNormals.push(normal);
+
+                        geo.faces.push(face3);
+
+                        // ＵＶ座標
+                        geo.faceVertexUvs[0].push([
+                            new THREE.Vector2(face.uv[6], 1.0 - face.uv[7]),
+                            new THREE.Vector2(face.uv[4], 1.0 - face.uv[5]),
+                            new THREE.Vector2(face.uv[2], 1.0 - face.uv[3])]);
+                    }
+                    {
+                        //フェース情報
+                        var index = [];
+                        index[0] = vIndex[1];
+                        index[1] = vIndex[0];
+                        index[2] = vIndex[3];
+                        for (var j = 0; j < 3; j++) {
+                            var v = this.vertices[index[j]];
+                            if (v.to != -1) {
+                                index[j] = v.to;
+                            } else {
+                                v.to = countVertex;
+                                index[j] = v.to;
+                                countVertex++;
+                            }
+                        }
+                        var face3 = new THREE.Face3(index[0], index[1], index[2], normal, undefined, face.m[0]);
+//                        var face3 = new THREE.Face3(vIndex[1], vIndex[0], vIndex[3], normal, undefined, face.m[0]);
+
+                        //頂点法線
+                        face3.vertexNormals.push(normal);
+                        face3.vertexNormals.push(normal);
+                        face3.vertexNormals.push(normal);
+
+                        geo.faces.push(face3);
+
+                        // ＵＶ座標
+                        geo.faceVertexUvs[0].push([
+                            new THREE.Vector2(face.uv[2], 1.0 - face.uv[3]),
+                            new THREE.Vector2(face.uv[0], 1.0 - face.uv[1]),
+                            new THREE.Vector2(face.uv[6], 1.0 - face.uv[7])]);
+                    }
+                }
+            }
+
+            //頂点情報
+            var scale = 1;
+            this.vertices.sort(function(a, b) {
+                return a.to - b.to;
+            });
+            for(var i = 0; i < this.vertices.length; i++) {
+                var v = this.vertices[i];
+                if (v.to != -1) {
+                    var x = v.x*scale;
+                    var y = v.y*scale;
+                    var z = v.z*scale;
+                    geo.vertices.push(new THREE.Vector3(x, y, z));
+                }
+            }
+
+            //各種情報計算
+            geo.computeBoundingBox();
+            geo.computeFaceNormals();
+            geo.computeVertexNormals();
+
+            //メッシュ生成
+            var obj = new THREE.Mesh(geo, mat);
+            return obj;
+        },
+
+        //頂点情報のパース
+        _parseVertices: function(num, text) {
+            var scale = 0.1;
+            var vertexTextList = text.split('\n');
+            for (var i = 0; i <= num; i++) {
+                var vertex = vertexTextList[i].split(' ');
+                if (vertex.length < 3)continue;
+                var v = {};
+                v.x = Number(vertex[0])*scale;
+                v.y = Number(vertex[1])*scale;
+                v.z = Number(vertex[2])*scale;
+                this.vertices.push(v);
+            }
+
+            //ミラーリング対応
+            if (this.mirror) {
+                var self = this;
+                var toMirror = (function(){
+                    return {
+                        1: function(v) { return [ v[0]*-1, v[1], v[2] ]; },
+                        2: function(v) { return [ v[0], v[1]*-1, v[2] ]; },
+                        4: function(v) { return [ v[0], v[1], v[2]*-1 ]; },
+                    }[self.mirrorAxis];
+                })();
+                var len = this.vertices.length;
+                for (var i = 0; i < len; i++) {
+                    this.vertices.push(toMirror(this.vertices[i]));
+                }
+            }
+        },
         //フェース情報のパース
         _parseFaces: function(num, text) {
             var faceTextList = text.split('\n');
@@ -527,7 +732,7 @@
     /*
      * メタセコイアマテリアル
      */
-    tm.define("tm.MQOMaterial", {
+    phina.define("phina.MQOMaterial", {
         materials: [],
 
         init: function(data) {
@@ -574,5 +779,5 @@
         },
     });
 
-})();
+});
 

@@ -1,7 +1,7 @@
 phina.namespace(function() {
-phina.asset.AssetLoader.assetLoadFunctions['mmd'] = function(key, path) {
-  var texture = phina.asset.Texture();
-  var flow = texture.load(path);
-  return flow;
-}
+  phina.asset.AssetLoader.assetLoadFunctions['mqo'] = function(key, path) {
+    var mqo = phina.asset.MQO();
+    var flow = mqo.load(path);
+    return flow;
+  }
 });
