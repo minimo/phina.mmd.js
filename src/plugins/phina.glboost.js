@@ -35,6 +35,16 @@ phina.namespace(function() {
     draw: function(canvas) {
       var domElement = this.canvas;
       canvas.context.drawImage(domElement, 0, 0, domElement.width, domElement.height);
-    }
+    },
+
+    addChild: function(child) {
+      //GLBoostObject追加
+      if (child.glbObject) {
+        this.scene.add(child.glbObject);
+      }
+
+      //通常のaddChild
+      return this.superClass.prototype.addChild.apply(this, arguments);
+    },
   });
 });
