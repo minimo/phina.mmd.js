@@ -22,18 +22,22 @@ phina.define('MainScene', {
       fovy: 45.0,
       aspect: 1.0,
       zNear: 0.1,
-      zFar: 300.0
+      zFar: 1000.0
     };
-    var camera = phina.glboost.Camera(lookat, perspective);
-    layer.addChild(camera);
+    var camera = phina.glboost.Camera(lookat, perspective).addChildTo(layer);
+
 /*
     var obj = phina.asset.AssetManager.get("mqo", "gradriel");
     var mesh = obj.getMesh(layer.canvas);
     layer.scene.add(mesh[0]);
     layer.scene.prepareForRender();
 */
+/*
+    var mesh = phina.glboost.Mesh('gradriel');
+    mesh.addChildTo(layer);
+*/
     this.createObject();
-    layer.scene.prepareForRender();
+    layer.prepareForRender();
 
     layer.update = function() {
       var rotateMatrix = GLBoost.Matrix44.rotateY(-0.02);
@@ -55,16 +59,16 @@ phina.define('MainScene', {
     material.shader = new GLBoost.PhongShader(this.layer.canvas);
 
     var geometry = new GLBoost.Cube(
-        new GLBoost.Vector3(20,20,20),
-        new GLBoost.Vector4(Math.random()*1,Math.random()*1,Math.random()*1,1),
-        this.layer.canvas);
+      new GLBoost.Vector3(20,20,20),
+      new GLBoost.Vector4(Math.random()*1,Math.random()*1,Math.random()*1,1),
+      this.layer.canvas);
 
-    for ( var i = 0; i < 2000; i ++ ) {
-      var object = new GLBoost.Mesh(geometry, material);
+    for (var i = 0; i < 2000; i ++) {
+      var object = phina.glboost.Mesh({geometry: geometry, material: material});
 
-      object.translate.x = Math.random() * 800 - 400;
-      object.translate.y = Math.random() * 800 - 400;
-      object.translate.z = Math.random() * 800 - 400;
+      object.position.x = Math.random() * 800 - 400;
+      object.position.y = Math.random() * 800 - 400;
+      object.position.z = Math.random() * 800 - 400;
 
       object.rotate.x = Math.random() * 2 * Math.PI;
       object.rotate.y = Math.random() * 2 * Math.PI;
@@ -74,11 +78,9 @@ phina.define('MainScene', {
       object.scale.y = Math.random() + 0.5;
       object.scale.z = Math.random() + 0.5;
 
-      //object.rotate = new GLBoost.Vector3(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI);
-      //object.scale = new GLBoost.Vector3(Math.random() + 0.5, Math.random() + 0.5, Math.random() + 0.5);
       object.dirty = true;
 
-      this.layer.scene.add( object );
+      object.addChildTo(this.layer);
     }
   },
 });

@@ -411,7 +411,7 @@ phina.namespace(function() {
                     var nx = face.n[0];
                     var ny = face.n[1];
                     var nz = face.n[2];
-                    var normal =  new THREE.Vector3(nx, ny, nz);
+                    var normal =  new GLBoost.Vector3(nx, ny, nz);
 
                     //フェース情報
                     var index = [];
@@ -428,7 +428,7 @@ phina.namespace(function() {
                             countVertex++;
                         }
                     }
-                    var face3 = new THREE.Face3(index[0], index[1], index[2], normal, undefined, face.m[0]);
+                    var face3 = new GLBoost.Face3(index[0], index[1], index[2], normal, undefined, face.m[0]);
 
                     //頂点法線
                     face3.vertexNormals.push(normal);
@@ -439,15 +439,15 @@ phina.namespace(function() {
 
                     // ＵＶ座標
                     geo.faceVertexUvs[0].push([
-                        new THREE.Vector2(face.uv[4], 1.0 - face.uv[5]),
-                        new THREE.Vector2(face.uv[2], 1.0 - face.uv[3]),
-                        new THREE.Vector2(face.uv[0], 1.0 - face.uv[1])]);
+                        new GLBoost.Vector2(face.uv[4], 1.0 - face.uv[5]),
+                        new GLBoost.Vector2(face.uv[2], 1.0 - face.uv[3]),
+                        new GLBoost.Vector2(face.uv[0], 1.0 - face.uv[1])]);
                 } else if (face.vNum == 4) {
                     //法線
                     var nx = face.n[0];
                     var ny = face.n[1];
                     var nz = face.n[2];
-                    var normal =  new THREE.Vector3(nx, ny, nz);
+                    var normal =  new GLBoost.Vector3(nx, ny, nz);
 
                     //四角を三角に分割
                     {
@@ -466,7 +466,7 @@ phina.namespace(function() {
                                 countVertex++;
                             }
                         }
-                        var face3 = new THREE.Face3(index[0], index[1], index[2], normal, undefined, face.m[0]);
+                        var face3 = new GLBoost.Face3(index[0], index[1], index[2], normal, undefined, face.m[0]);
 //                        var face3 = new THREE.Face3(vIndex[3], vIndex[2], vIndex[1], normal, undefined, face.m[0]);
 
                         //頂点法線
@@ -478,9 +478,9 @@ phina.namespace(function() {
 
                         // ＵＶ座標
                         geo.faceVertexUvs[0].push([
-                            new THREE.Vector2(face.uv[6], 1.0 - face.uv[7]),
-                            new THREE.Vector2(face.uv[4], 1.0 - face.uv[5]),
-                            new THREE.Vector2(face.uv[2], 1.0 - face.uv[3])]);
+                            new GLBoost.Vector2(face.uv[6], 1.0 - face.uv[7]),
+                            new GLBoost.Vector2(face.uv[4], 1.0 - face.uv[5]),
+                            new GLBoost.Vector2(face.uv[2], 1.0 - face.uv[3])]);
                     }
                     {
                         //フェース情報
@@ -510,9 +510,9 @@ phina.namespace(function() {
 
                         // ＵＶ座標
                         geo.faceVertexUvs[0].push([
-                            new THREE.Vector2(face.uv[2], 1.0 - face.uv[3]),
-                            new THREE.Vector2(face.uv[0], 1.0 - face.uv[1]),
-                            new THREE.Vector2(face.uv[6], 1.0 - face.uv[7])]);
+                            new GLBoost.Vector2(face.uv[2], 1.0 - face.uv[3]),
+                            new GLBoost.Vector2(face.uv[0], 1.0 - face.uv[1]),
+                            new GLBoost.Vector2(face.uv[6], 1.0 - face.uv[7])]);
                     }
                 }
             }
@@ -538,7 +538,7 @@ phina.namespace(function() {
             geo.computeVertexNormals();
 
             //メッシュ生成
-            var obj = new THREE.Mesh(geo, mat);
+            var obj = new GLBoost.Mesh(geo, mat);
             return obj;
         },
 

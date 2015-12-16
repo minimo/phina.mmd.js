@@ -37,6 +37,10 @@ phina.namespace(function() {
       canvas.context.drawImage(domElement, 0, 0, domElement.width, domElement.height);
     },
 
+    prepareForRender: function() {
+      this.scene.prepareForRender();
+    },
+
     addChild: function(child) {
       //GLBoostObject追加
       if (child.glbObject) {
