@@ -1,27 +1,62 @@
 phina.namespace(function() {
 
-  //Add GLBoost object property accessor
-  var addGLBAccessor = function(type, property, name) {
-    if (name) {
-      type.prototype.accessor(property, {
-        get: function() {
-          return this.glbObject[property][name];
-        },
-        set: function(v) {
-          this.glbObject[property][name] = v;
+  phina.define("phina.glboost.DelegateUtil", {
+    init: function(type) {
+      this.type = type;
+    },
+    property: function(name, glbProperty) {
+      if (glbProperty) {
+        this.type.prototype.accessor(name, {
+          get: function() {
+            return this.glbObject[glbProperty][name];
+          },
+          set: function(v) {
+            this.glbObject[glbProperty][name] = v;
+          }
+        });
+      } else {
+        this.type.prototype.accessor(name, {
+          get: function() {
+            return this.glbObject[name];
+          },
+          set: function(v) {
+            this.glbObject[name] = v;
+          }
+        });
+      }
+      this.type.prototype[createSetterName(name)] = function(v) {
+        this[name] = v;
+        return this;
+      };
+    },
+    method: function(name, returnThis, glbProperty) {
+      if (glbProperty) {
+        this.type.prototype[name] = function() {
+          var r = this.glbObject[glbProperty][name].apply(this.glbObject[glbProperty], arguments);
+          if (returnThis) {
+            return this;
+          } else {
+            return r;
+          }
         }
-      });
-    } else {
-      type.prototype.accessor(property, {
-        get: function() {
-          return this.glbObject[property];
-        },
-        set: function(v) {
-          this.glbObject[property] = v;
+      } else {
+        this.type.prototype[name] = function() {
+          var r = this.glbObject[name].apply(this.glbObject, arguments);
+          if (returnThis) {
+            return this;
+          } else {
+            return r;
+          }
         }
-      });
-    }
+      }
+    },
+  });
+  function createSetterName(propertyName) {
+    return "set" + propertyName[0].toUpperCase() + propertyName.substring(1);
   }
+});
+
+phina.namespace(function() {
 
   phina.define('phina.glboost.Element', {
     superClass: 'phina.app.Object2D',
@@ -29,36 +64,65 @@ phina.namespace(function() {
     glbObject: null,
 
     init: function(glbObject) {
+      this.glbObject = glbObject || new GLBoost.Element();
       this.superInit();
-      this.glbObject = glbObject || new GLBoost.Elemet();
-
+/*
       this.position = new GLBoost.Vector3(0, 0, 0);
       this.scale = new GLBoost.Vector3(1.0, 1.0, 1.0);
-      this.rotate = new GLBoost.Vector3(0, 0, 0);
+      this.rotation = new GLBoost.Vector3(0, 0, 0);
+*/
     },
 
-    setPosition: function(x, y, z) {
-      this.position.x = x;
-      this.position.y = y;
-      this.position.z = z;
-    },
-
-    setScale: function(x, y, z) {
-      if (arguments.length === 1) {
-        y = x;
-        z = x;
-      }
-      this.scale.x = x;
-      this.scale.y = y;
-      this.scale.z = z;
-    },
-
-    setRotate: function(x, y, z) {
-      this.rotate.x = x;
-      this.rotate.y = y;
-      this.rotate.z = z;
+    _accessor: {
+      translate: {
+        set: function(v) {
+          this.positon = v;
+          this.glbObject.translate = v;
+        },
+        get: function() {
+          return this.glbObject.translate;
+        },
+      },
+      position: {
+        set: function(v) {
+          this.positon = v;
+          this.glbObject.translate = v;
+        },
+        get: function() {
+          return this.glbObject.translate;
+        },
+      },
+      rotate: {
+        set: function(v) {
+          this.glbObject.rotate = v;
+        },
+        get: function() {
+          return this.glbObject.rotate;
+        },
+      },
+      rotation: {
+        set: function(v) {
+          this.glbObject.rotate = v;
+        },
+        get: function() {
+          return this.glbObject.rotate;
+        },
+      },
+      scale: {
+        set: function(v) {
+          this.glbObject.scale = v;
+        },
+        get: function() {
+          return this.glbObject.scale;
+        },
+      },
     },
   });
+  var delegater = phina.glboost.DelegateUtil(phina.glboost.Element);
+  delegater.property("dirty");
+});
+
+phina.namespace(function() {
 
   phina.define('phina.glboost.Camera', {
     superClass: 'phina.glboost.Element',
@@ -68,15 +132,16 @@ phina.namespace(function() {
       this.superInit(camera);
     },
   });
-  addGLBAccessor(phina.glboost.Camera, "translate");
-  addGLBAccessor(phina.glboost.Camera, "eye");
-  addGLBAccessor(phina.glboost.Camera, "center");
-  addGLBAccessor(phina.glboost.Camera, "up");
-  addGLBAccessor(phina.glboost.Camera, "fovy");
-  addGLBAccessor(phina.glboost.Camera, "aspect");
-  addGLBAccessor(phina.glboost.Camera, "zNear");
-  addGLBAccessor(phina.glboost.Camera, "zFar");
+  var delegater = phina.glboost.DelegateUtil(phina.glboost.Camera);
+  delegater.property("eye");
+  delegater.property("center");
+  delegater.property("up");
+  delegater.property("aspect");
+  delegater.property("zNear");
+  delegater.property("zFar");
+});
 
+phina.namespace(function() {
 
   phina.define('phina.glboost.Mesh', {
     superClass: 'phina.glboost.Element',
@@ -110,20 +175,9 @@ phina.namespace(function() {
           this.superInit();
         }
       }
-
-      this.on('enterframe', this.onrender);
-    },
-
-    onrender: function(app) {
-      this.glbObject.translate = this.position;
-      this.glbObject.rotate = this.rotate;
-      this.glbObject.scale = this.scale;
     },
   });
-  addGLBAccessor(phina.glboost.Mesh, "geometry");
-  addGLBAccessor(phina.glboost.Mesh, "material");
-  addGLBAccessor(phina.glboost.Mesh, "translate");
-  addGLBAccessor(phina.glboost.Mesh, "rotate");
-  addGLBAccessor(phina.glboost.Mesh, "dirty");
-
+  var delegater = phina.glboost.DelegateUtil(phina.glboost.Mesh);
+  delegater.property("geometry");
+  delegater.property("material");
 });
