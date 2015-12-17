@@ -24,6 +24,7 @@ phina.namespace(function() {
           }
         });
       }
+      // add set[Propertyname] method
       this.type.prototype[createSetterName(name)] = function(v) {
         this[name] = v;
         return this;
@@ -59,66 +60,73 @@ phina.namespace(function() {
 phina.namespace(function() {
 
   phina.define('phina.glboost.Element', {
-    superClass: 'phina.app.Object2D',
+    superClass: 'phina.app.Element',
 
     glbObject: null,
 
     init: function(glbObject) {
-      this.glbObject = glbObject || new GLBoost.Element();
       this.superInit();
-/*
-      this.position = new GLBoost.Vector3(0, 0, 0);
-      this.scale = new GLBoost.Vector3(1.0, 1.0, 1.0);
-      this.rotation = new GLBoost.Vector3(0, 0, 0);
-*/
+      this.glbObject = glbObject || new GLBoost.Element();
+    },
+
+    setScale: function(x, y, z) {
+        if (arguments.length === 1) {
+            y = x;
+            z = x;
+        }
+        this.glbObject.scale.x = x;
+        this.glbObject.scale.y = y;
+        this.glbObject.scale.z = z;
+        this.dirty = true;
     },
 
     _accessor: {
-      translate: {
-        set: function(v) {
-          this.positon = v;
-          this.glbObject.translate = v;
-        },
-        get: function() {
-          return this.glbObject.translate;
-        },
-      },
-      position: {
-        set: function(v) {
-          this.positon = v;
-          this.glbObject.translate = v;
-        },
-        get: function() {
-          return this.glbObject.translate;
-        },
-      },
-      rotate: {
-        set: function(v) {
-          this.glbObject.rotate = v;
-        },
-        get: function() {
-          return this.glbObject.rotate;
-        },
-      },
-      rotation: {
-        set: function(v) {
-          this.glbObject.rotate = v;
-        },
-        get: function() {
-          return this.glbObject.rotate;
-        },
-      },
       scale: {
-        set: function(v) {
-          this.glbObject.scale = v;
-        },
-        get: function() {
-          return this.glbObject.scale;
-        },
+        set: function(v) { this.glbObject.scale = v; this.dirty = true; },
+        get: function()  { return this.glbObject.scale; },
+      },
+
+      x: {
+        set: function(v) { this.glbObject.translate.x = v; this.dirty = true; },
+        get: function()  { return this.glbObject.translate.x; },
+      },
+      y: {
+        set: function(v) { this.glbObject.translate.y = v; this.dirty = true;},
+        get: function()  { return this.glbObject.translate.y; },
+      },
+      z: {
+        set: function(v) { this.glbObject.translate.z = v; this.dirty = true;},
+        get: function()  { return this.glbObject.translate.z; },
+      },
+      rotateX: {
+        set: function(v) { this.glbObject.rotate.x = v; this.dirty = true;},
+        get: function()  { return this.glbObject.rotate.x; },
+      },
+      rotateY: {
+        set: function(v) { this.glbObject.rotate.y = v; this.dirty = true;},
+        get: function()  { return this.glbObject.rotate.y; },
+      },
+      rotateZ: {
+        set: function(v) { this.glbObject.rotate.z = v; this.dirty = true;},
+        get: function()  { return this.glbObject.rotate.z; },
+      },
+      scaleX: {
+        set: function(v) { this.glbObject.scale.x = v; this.dirty = true;},
+        get: function()  { return this.glbObject.scale.x; },
+      },
+      scaleY: {
+        set: function(v) { this.glbObject.scale.y = v; this.dirty = true;},
+        get: function()  { return this.glbObject.scale.y; },
+      },
+      scaleZ: {
+        set: function(v) { this.glbObject.scale.z = v; this.dirty = true;},
+        get: function()  { return this.glbObject.scale.z; },
       },
     },
   });
   var delegater = phina.glboost.DelegateUtil(phina.glboost.Element);
+  delegater.property("translate");
+  delegater.property("rotate");
   delegater.property("dirty");
 });
 
