@@ -17,6 +17,10 @@ phina.namespace(function() {
 
     init: function(params) {
       this.superInit();
+      params.$safe({
+        width: 640,
+        height: 640,
+      });
 
       this.canvas = document.createElement("canvas");
       this.canvas.id = 'glboost_world';
