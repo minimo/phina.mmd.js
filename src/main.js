@@ -64,34 +64,33 @@ phina.define('MainScene', {
       this.layer.canvas);
 
     for (var i = 0; i < 2000; i ++) {
-      var object = phina.glboost.Mesh({geometry: geometry, material: material});
-
-      object.position.x = Math.random() * 800 - 400;
-      object.position.y = Math.random() * 800 - 400;
-      object.position.z = Math.random() * 800 - 400;
-
-      object.rotate.x = Math.random() * 2 * Math.PI;
-      object.rotate.y = Math.random() * 2 * Math.PI;
-      object.rotate.z = Math.random() * 2 * Math.PI;
-
-      object.scale.x = Math.random() + 0.5;
-      object.scale.y = Math.random() + 0.5;
-      object.scale.z = Math.random() + 0.5;
-
+      var object = phina.glboost.Mesh({
+        geometry: geometry,
+        material: material
+      });
+      object.translate = new GLBoost.Vector3(Math.randint(0, 800) - 400, Math.randint(0, 800) - 400, Math.randint(0, 800) - 400);
+      object.rotate = new GLBoost.Vector3(Math.randfloat(0, 2)*Math.PI, Math.randfloat(0, 2)*Math.PI, Math.randfloat(0, 2)*Math.PI);
+      object.scale = new GLBoost.Vector3(Math.randfloat(0.5, 1.5), Math.randfloat(0.5, 1.5), Math.randfloat(0.5, 1.5));
       object.dirty = true;
 
+      object.tweener.clear()
+        .to({scaleY: 3}, 500, "easeOutSine")
+        .to({scaleY: 1}, 500, "easeOutElastic")
+        .setLoop(true);
       object.addChildTo(this.layer);
-    }
+    }   
   },
 });
 
 phina.main(function() {
   var app = phina.game.GameApp({
+/*
     assets: {
       mqo: {
         'gradriel': 'assets/gradriel_pose.mqo',
       },
     },
+*/
     startLabel: 'main',
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT
