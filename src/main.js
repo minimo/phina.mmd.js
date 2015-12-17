@@ -73,10 +73,12 @@ phina.define('MainScene', {
       object.scale = new GLBoost.Vector3(Math.randfloat(0.5, 1.5), Math.randfloat(0.5, 1.5), Math.randfloat(0.5, 1.5));
       object.dirty = true;
 
-      object.tweener.clear()
-        .to({scaleY: 3}, 500, "easeOutSine")
-        .to({scaleY: 1}, 500, "easeOutElastic")
-        .setLoop(true);
+      if (i%3 == 0) {
+        object.tweener.clear()
+          .to({scaleX: 3}, 500, "easeOutSine")
+          .to({scaleX: 1}, 500, "easeOutElastic")
+          .setLoop(true);
+      }
       object.addChildTo(this.layer);
     }   
   },
