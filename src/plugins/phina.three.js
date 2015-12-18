@@ -449,17 +449,12 @@ phina.namespace(function() {
          */
         init: function(mesh) {
             if (typeof(mesh) === "string") {
-                var asset = phina.asset.Manager.get(mesh);
+                var asset = phina.asset.AssetManager.get("mqo", mesh);
                 if (asset) {
-                    if (asset instanceof phina.asset.ThreeJSON) {
-                        this.superInit(asset.mesh.clone());
-                    } else if (asset instanceof phina.asset.Vox) {
-                        this.superInit(asset.mesh.clone());
-                    } else if (asset instanceof phina.asset.MQO) {
-                        this.superInit(asset.model.meshes[0].clone());
-                        for (var i = 1; i < asset.model.meshes.length; i++) {
-                            phina.three.Mesh(asset.model.meshes[i].clone()).addChildTo(this);
-                        }
+                    var meshes = asset.getMesh();
+                    this.superInit(meshes[0]);
+                    for (var i = 1; i < meshes.length; i++) {
+                        phina.three.Mesh(meshes[i]).addChildTo(this);
                     }
                 } else {
                     console.error("アセット'{0}'がないよ".format(mesh));
@@ -1395,26 +1390,26 @@ phina.namespace(function() {
     phina.asset = phina.asset || {};
 
     phina.define("phina.asset.ThreeJSON", {
-        superClass: "phina.event.EventDispatcher",
+        superClass: "phina.asset.Asset",
 
-        /**
-         * @constructor phina.asset.ThreeJSON
-         * @extends {phina.event.EventDispatcher}
-         */
-        init: function(path) {
+        model: null,
+        modelPath: "",
+
+        init: function() {
             this.superInit();
-            this.mesh = null;
+        },
 
+        _load: function(resolve) {
             if (phina.asset.ThreeJSON.loader === null) {
                 phina.asset.ThreeJSON.loader = new THREE.JSONLoader();
             }
 
+            var that = this;
             phina.asset.ThreeJSON.loader.load(path, function(geometry, materials) {
                 this.build(geometry, materials);
-                this.flare("load");
+                resolve(this);
             }.bind(this));
         },
-
         build: function(geometry, materials) {
             materials.forEach(function(m) {
                 m.shading = THREE.FlatShading;
@@ -1437,33 +1432,30 @@ phina.namespace(function() {
 
     phina.asset = phina.asset || {};
 
-    phina.define("phina.asset.Vox", {
-        superClass: "phina.event.EventDispatcher",
+    phina.define("phina.asset.ThreeJSON", {
+        superClass: "phina.asset.Asset",
 
-        /**
-         * usage:
-         * phina.asset.LoadingScene({ assets: { vox: "test.vox" } });
-         *
-         * @constructor phina.asset.Vox
-         * @extends {phina.event.EventDispatcher}
-         */
-        init: function(path) {
+        model: null,
+        modelPath: "",
+
+        init: function() {
             this.superInit();
+        },
 
-            this.mesh = null;
-
+        _load: function(resolve) {
             if (phina.asset.Vox.parser === null) {
                 phina.asset.Vox.parser = new vox.Parser();
             }
 
+            var that = this;
             phina.asset.Vox.parser.parse(path).then(function(voxelData) {
                 var builder = new vox.MeshBuilder(voxelData);
                 this.mesh = builder.createMesh();
-                this.flare("load");
+                resolve(this);
             }.bind(this));
         },
         _static: {
-            parser: null,
+            paeser: null,
         },
     });
 });

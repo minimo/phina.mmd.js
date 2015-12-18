@@ -1,5 +1,7 @@
 phina.namespace(function() {
 
+    var _modelPath = "";
+
     phina.define("phina.asset.MQO", {
         superClass: "phina.asset.Asset",
 
@@ -29,6 +31,7 @@ phina.namespace(function() {
         },
 
         getMesh: function(canvas) {
+            _modelPath = this.modelPath;
             return this.model.convert(canvas);
         }
     });
@@ -154,7 +157,7 @@ phina.namespace(function() {
             //使用マテリアルに応じてオブジェクトを分割変換
             this.build = null;
             if (THREE) this.build = this.buildTHREE;
-            if (GLBoost !== undefined) this.build = this.buildGLB;
+//            if (GLBoost !== undefined) this.build = this.buildGLB;
 
             var meshList = []
             for (var mn = 0; mn < facemat.length; mn++) {

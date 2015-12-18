@@ -1,15 +1,17 @@
 phina.namespace(function() {
 
-  //ThreeLayerのaddChildを変更
-  phina.display.ThreeLayer.prototype.addChild: function(child) {
-    //GLBoostObject追加
-    if (child.threeObject) this.scene.add(child.threeObject);
+  //ThreeLayer縺ｮaddChild繧貞､画峩
+  phina.display.ThreeLayer.prototype.addChild = function(child) {
+    //GLBoostObject霑ｽ蜉
+    if (child.threeObject) {
+        this.scene.add(child.threeObject);
+    }
 
-    //通常のaddChild
+    //騾壼ｸｸ縺ｮaddChild
     return this.superClass.prototype.addChild.apply(this, arguments);
   }
 
-  //アセットローダー追加
+  //繧｢繧ｻ繝�繝医Ο繝ｼ繝繝ｼ霑ｽ蜉
   phina.asset.AssetLoader.assetLoadFunctions['mqo'] = function(key, path) {
     var mqo = phina.asset.MQO();
     var flow = mqo.load(path);
