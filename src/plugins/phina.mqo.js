@@ -153,7 +153,7 @@ phina.namespace(function() {
 
             //使用マテリアルに応じてオブジェクトを分割変換
             this.build = null;
-//            if (THREE) build = this.buildTHREE;
+            if (THREE) this.build = this.buildTHREE;
             if (GLBoost !== undefined) this.build = this.buildGLB;
 
             var meshList = []

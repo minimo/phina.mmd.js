@@ -8,23 +8,10 @@ phina.define('MainScene', {
   init: function(options) {
     this.superInit();
 
-    var layer = this.layer = phina.display.GLBoostLayer({
+    var layer = this.layer = phina.display.ThreeLayer({
       width: SCREEN_WIDTH,
       height: SCREEN_HEIGHT
     }).addChildTo(this);
-
-    var lookat = {
-      eye: new GLBoost.Vector4(0.0, 1.5, 10.0, 1),
-      center: new GLBoost.Vector3(0.0, 1.5, 0.0),
-      up: new GLBoost.Vector3(0.0, 1.0, 0.0)
-    };
-    var perspective = {
-      fovy: 45.0,
-      aspect: 1.0,
-      zNear: 0.1,
-      zFar: 1000.0
-    };
-    var camera = phina.glboost.Camera(lookat, perspective).addChildTo(layer);
 
 /*
     var obj = phina.asset.AssetManager.get("mqo", "gradriel");
@@ -36,6 +23,7 @@ phina.define('MainScene', {
     var mesh = phina.glboost.Mesh('gradriel');
     mesh.addChildTo(layer);
 */
+/*
     this.createObject();
     layer.prepareForRender();
 
@@ -44,7 +32,7 @@ phina.define('MainScene', {
       var rotatedVector = rotateMatrix.multiplyVector(camera.eye);
       camera.eye = rotatedVector;
     };
-
+*/
     var label = phina.display.Label('phina.jsとGLBoostの\n夢の共演！').addChildTo(this);
     label.fill = 'white';
     label.stroke = 'black';
