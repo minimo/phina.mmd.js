@@ -11,15 +11,14 @@ phina.define('MainScene', {
       width: SCREEN_WIDTH,
       height: SCREEN_HEIGHT
     }).addChildTo(this);
+    layer.camera.position.x = 0;
+    layer.camera.position.y = 10;
+    layer.camera.position.z = 30;
+//    layer.camera.lookAt(0, 0, 0);
 
-/*
-    var mesh = phina.three.Mesh('gradriel');
-    mesh.addChildTo(layer);
-*/
-    var asset = phina.asset.AssetManager.get("mqo", "gradriel");
-    if (asset) {
-      var meshes = asset.getMesh();
-      layer.scene.add(meshes[0]);
+    var mesh = phina.three.Mesh('gradriel').addChildTo(layer);
+    mesh.update = function() {
+        this.rotation.y+=0.01;
     }
 
     var label = phina.display.Label('phina.jsとThree\n連携テスト').addChildTo(this);
