@@ -14,14 +14,14 @@ phina.define('MainScene', {
     layer.camera.position.x = 0;
     layer.camera.position.y = 10;
     layer.camera.position.z = 30;
-//    layer.camera.lookAt(0, 0, 0);
+    layer.renderer.setClearColor(0x000000);
 
     var mesh = phina.three.Mesh('gradriel').addChildTo(layer);
     mesh.update = function() {
-        this.rotation.y+=0.01;
+        this.rotation.y+=0.02;
     }
 
-    var label = phina.display.Label('phina.jsとThree\n連携テスト').addChildTo(this);
+    var label = phina.display.Label('phina.jsとThree.js\n連携テスト').addChildTo(this);
     label.fill = 'white';
     label.stroke = 'black';
     label.fontSize = 32;
@@ -36,6 +36,12 @@ phina.main(function() {
     assets: {
       mqo: {
         'gradriel': 'assets/gradriel_pose.mqo',
+      },
+      mmd: {
+        'miku': {
+            pmd: 'assets/pmd/miku_v2.pmd',
+            vmd: 'assets/vmd/wavefile_v2.vmd',
+        },
       },
     },
     startLabel: 'main',
