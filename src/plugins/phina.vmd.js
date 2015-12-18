@@ -6,7 +6,7 @@ phina.namespace(function() {
     phina.asset = phina.asset || {};
 
     phina.define("phina.asset.VMD", {
-        superClass: "phina.event.EventDispatcher",
+        superClass: "phina.asset.Asset",
 
         init: function(path) {
             this.superInit();
@@ -20,14 +20,14 @@ phina.namespace(function() {
             req.responseType = "arraybuffer";
             req.onload = function() {
                 var data = req.response;
-                that.vmd = VMDParser(data);
+                that.vmd = phina.asset.VMD.VMDParser(data);
                 resolve(that);
             };
             req.send(null);
         },
     });
 
-    VMDParser = function(data) {
+    phina.asset.VMD.VMDParser = function(data) {
         var dv = phina.DataViewEx(data);
         var vmd = {};
         vmd.metadata = {};

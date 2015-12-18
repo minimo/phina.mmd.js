@@ -6,12 +6,19 @@ phina.namespace(function() {
     phina.asset = phina.asset || {};
 
     phina.define("phina.asset.MMD", {
-        superClass: "phina.event.EventDispatcher",
+        superClass: "phina.asset.Asset",
+
+        pmd: null,
+        vmd: null,
+
         init: function(path) {
             this.superInit();
         },
 
         _load: function(resolve) {
+            this.pmd = null;
+            this.vmd = null;
+
             var modelPath = this.src['pmd'];
             var motionPath = this.src['vmd'];
 
@@ -21,62 +28,42 @@ phina.namespace(function() {
             req.responseType = "arraybuffer";
             req.onload = function() {
                 var data = req.response;
-                that.pmd = PMDParser(data, modelPath);
+                that.pmd = phina.asset.PMD.PMDParser(data, modelPath);
 
                 var req2 = new XMLHttpRequest();
                 req2.open("GET", motionPath, true);
                 req2.responseType = "arraybuffer";
                 req2.onload = function() {
                     var data2 = req2.response;
-                    that.vmd = VMDParser(data2);
-                    that.mesh = phina.hybrid.createThreeMeshFromMMD(that.pmd, that.vmd);
+                    that.vmd = phina.asset.VMD.VMDParser(data2);
                     resolve(that);
                 };
                 req2.send(null);
             };
             req.send(null);
         },
-
-    });
-
-    //ローダーに拡張子登録
-    phina.asset.Loader.register("mmd", function(path) {
-        return phina.asset.MMD(path);
+        getMesh: function() {
+            return phina.three.createThreeMeshFromMMD(this.pmd, this.vmd);
+        },
     });
 
     //ＭＭＤ関連ファイルを統合してメッシュを生成
-    phina.hybrid.createMeshFromMMD = function(pmdName, vmdName) {
-        var asset = phina.asset.Manager.get(pmdName);
-        var pmd = asset.pmd;
-        if (!pmd) {
-            console.error("アセット'{0}'がないよ".format(pmdName));
-            return null;
-        }
-        if (!(asset instanceof phina.asset.PMD)) {
-            console.error("アセット'{0}'はPMDじゃないよ".format(pmdName));
+    phina.three.createMeshFromMMD = function(mmdName) {
+        var asset = phina.asset.AssetManager.get('mmd', mmdName);
+        if (!asset) {
+            console.error("アセット'{0}'がないよ".format(mmdName));
             return null;
         }
 
-        var asset = phina.asset.Manager.get(vmdName);
-        var vmd = asset.vmd;
-        if (!vmd) {
-            console.error("アセット'{0}'がないよ".format(vmdName));
-            return null;
-        }
-        if (!(asset instanceof phina.asset.VMD)) {
-            console.error("アセット'{0}'はVMDじゃないよ".format(vmdName));
-            return null;
-        }
-
-        var mesh = phina.hybrid.createThreeMeshFromMMD(pmd, vmd);
-        var hybridMesh = phina.hybrid.MMDMesh(mesh);
+        var mesh = phina.three.createThreeMeshFromMMD(asset.pmd, asset.vmd);
+        var hybridMesh = phina.three.MMDMesh(mesh);
         hybridMesh._animation = new THREE.Animation(mesh, mesh.geometry.animation);
         hybridMesh._animation.play();
 
         hybridMesh._morphAnimation = new THREE.MorphAnimation2(mesh, mesh.geometry.morphAnimation);
         hybridMesh._morphAnimation.play();
 
-        hybridMesh._ikSolver = new phina.hybrid.mmd.CCDIKSolver(mesh);
+        hybridMesh._ikSolver = new phina.three.mmd.CCDIKSolver(mesh);
         hybridMesh.on('enterframe', function(e) {
             this._ikSolver.update();
         }.bind(hybridMesh));
@@ -85,7 +72,7 @@ phina.namespace(function() {
     }
 
     //メタデータからThreeメッシュを生成
-    phina.hybrid.createThreeMeshFromMMD = function(pmd, vmd) {
+    phina.three.createThreeMeshFromMMD = function(pmd, vmd) {
         var texturePath = pmd.texturePath;
 
         var geometry = new THREE.Geometry();
@@ -446,7 +433,7 @@ phina.namespace(function() {
     }
 
     //CCD法によるIK解決
-    phina.define("phina.hybrid.mmd.CCDIKSolver", {
+    phina.define("phina.three.mmd.CCDIKSolver", {
         init: function(mesh) {
             this.mesh = mesh;
         },
@@ -684,4 +671,4 @@ phina.namespace(function() {
             }
         }
     };
-})();
+});

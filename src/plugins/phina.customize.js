@@ -28,8 +28,8 @@ phina.namespace(function() {
     return flow;
   }
   phina.asset.AssetLoader.assetLoadFunctions['mmd'] = function(key, path) {
-    var mqo = phina.asset.MQO();
-    var flow = mqo.load(path);
+    var mmd = phina.asset.MMD();
+    var flow = mmd.load(path);
     return flow;
   }
 });

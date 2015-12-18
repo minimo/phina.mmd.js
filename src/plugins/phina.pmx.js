@@ -2,41 +2,34 @@
  * pmx.js
  */
 
-(function() {
+phina.namespace(function() {
     phina.asset = phina.asset || {};
 
     phina.define("phina.asset.PMX", {
-        superClass: "phina.event.EventDispatcher",
+        superClass: "phina.asset.Asset",
 
         init: function(path) {
             this.superInit();
-            this.pmx = null;
-            this.path = path;
-            this.texturePath = null;
-            this.loadFromURL(path);
         },
 
-        // URLからロード
-        loadFromURL: function(path) {
+        _load: function(resolve) {
+            this.pmx = null;
+            this.texturePath = null;
+
             var that = this;
             var req = new XMLHttpRequest();
-            req.open("GET", path, true);
+            req.open("GET", this.src, true);
             req.responseType = "arraybuffer";
             req.onload = function() {
                 var data = req.response;
-                that.loadFromData(data, path);
+                that.pmx = PMXParser(data, that.src);
+                resovle(that);
             };
             req.send(null);
         },
-
-        //データからロード
-        loadFromData: function(data, path) {
-            this.pmx = PMXParser(data, path);
-            this.flare("load");
-        },
     });
 
-    PMXParser = function(data, path) {
+    var PMXParser = function(data, path) {
         var dv = phina.DataViewEx(data);
         var pmx = {};
         pmx.metadata = {};
@@ -227,9 +220,4 @@
         }
         return pmx;
     }
-
-    //ローダーに拡張子登録
-    phina.asset.Loader.register("pmx", function(path) {
-        return phina.asset.PMX(path);
-    });
-})();
+});

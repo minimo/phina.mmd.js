@@ -6,7 +6,7 @@ phina.namespace(function() {
     phina.asset = phina.asset || {};
 
     phina.define("phina.asset.PMD", {
-        superClass: "phina.event.EventDispatcher",
+        superClass: "phina.asset.Asset",
 
         init: function(path) {
             this.superInit();
@@ -22,14 +22,14 @@ phina.namespace(function() {
             req.responseType = "arraybuffer";
             req.onload = function() {
                 var data = req.response;
-                that.pmd = PMDParser(data, that.src);
+                that.pmd = phina.asset.PMD.PMDParser(data, that.src);
                 resolve(that);
             };
             req.send(null);
         },
     });
 
-    PMDParser = function(data, path) {
+    phina.asset.PMD.PMDParser = function(data, path) {
         var dv = phina.DataViewEx(data);
         var pmd = {};
         pmd.metadata = {};
