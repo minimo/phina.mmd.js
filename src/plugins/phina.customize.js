@@ -27,4 +27,9 @@ phina.namespace(function() {
     var flow = mqo.load(path);
     return flow;
   }
+  phina.asset.AssetLoader.assetLoadFunctions['mmd'] = function(key, path) {
+    var mqo = phina.asset.MQO();
+    var flow = mqo.load(path);
+    return flow;
+  }
 });

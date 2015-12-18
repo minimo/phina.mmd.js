@@ -3,10 +3,10 @@
  */
 
 (function() {
-    tm.asset = tm.asset || {};
+    phina.asset = phina.asset || {};
 
-    tm.define("tm.asset.PMX", {
-        superClass: "tm.event.EventDispatcher",
+    phina.define("phina.asset.PMX", {
+        superClass: "phina.event.EventDispatcher",
 
         init: function(path) {
             this.superInit();
@@ -37,7 +37,7 @@
     });
 
     PMXParser = function(data, path) {
-        var dv = tm.DataViewEx(data);
+        var dv = phina.DataViewEx(data);
         var pmx = {};
         pmx.metadata = {};
         pmx.metadata.format = 'pmx';
@@ -229,7 +229,7 @@
     }
 
     //ローダーに拡張子登録
-    tm.asset.Loader.register("pmx", function(path) {
-        return tm.asset.PMX(path);
+    phina.asset.Loader.register("pmx", function(path) {
+        return phina.asset.PMX(path);
     });
 })();

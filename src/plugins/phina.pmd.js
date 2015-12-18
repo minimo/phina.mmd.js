@@ -2,42 +2,35 @@
  * pmd.js
  */
 
-(function() {
-    tm.asset = tm.asset || {};
+phina.namespace(function() {
+    phina.asset = phina.asset || {};
 
-    tm.define("tm.asset.PMD", {
-        superClass: "tm.event.EventDispatcher",
+    phina.define("phina.asset.PMD", {
+        superClass: "phina.event.EventDispatcher",
 
         init: function(path) {
             this.superInit();
-            this.pmd = null;
-            this.path = path;
-            this.texturePath = null;
-            this.loadFromURL(path);
         },
 
-        // URLからロード
-        loadFromURL: function(path) {
+        _load: function(resolve) {
+            this.pmd = null;
+            this.texturePath = null;
+
             var that = this;
             var req = new XMLHttpRequest();
-            req.open("GET", path, true);
+            req.open("GET", this.src, true);
             req.responseType = "arraybuffer";
             req.onload = function() {
                 var data = req.response;
-                that.loadFromData(data, path);
+                that.pmd = PMDParser(data, that.src);
+                resolve(that);
             };
             req.send(null);
-        },
-
-        //データからロード
-        loadFromData: function(data, path) {
-            this.pmd = PMDParser(data, path);
-            this.flare("load");
         },
     });
 
     PMDParser = function(data, path) {
-        var dv = tm.DataViewEx(data);
+        var dv = phina.DataViewEx(data);
         var pmd = {};
         pmd.metadata = {};
         pmd.metadata.format = 'pmd';
@@ -153,9 +146,4 @@
         }
         return pmd;
     }
-
-    //ローダーに拡張子登録
-    tm.asset.Loader.register("pmd", function(path) {
-        return tm.asset.PMD(path);
-    });
-})();
+});

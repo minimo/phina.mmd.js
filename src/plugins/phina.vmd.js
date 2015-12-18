@@ -1,37 +1,34 @@
-(function() {
-    tm.asset = tm.asset || {};
+/*
+ * vmd.js
+ */
 
-    tm.define("tm.asset.VMD", {
-        superClass: "tm.event.EventDispatcher",
+phina.namespace(function() {
+    phina.asset = phina.asset || {};
+
+    phina.define("phina.asset.VMD", {
+        superClass: "phina.event.EventDispatcher",
 
         init: function(path) {
             this.superInit();
-            this.vmd = null;
-            this.loadFromURL(path);
         },
 
-        // URLからロード
-        loadFromURL: function(path) {
+        _load: function(resolve) {
+            this.vmd = null;
             var that = this;
             var req = new XMLHttpRequest();
             req.open("GET", path, true);
             req.responseType = "arraybuffer";
             req.onload = function() {
                 var data = req.response;
-                that.loadFromData(data);
+                that.vmd = VMDParser(data);
+                resolve(that);
             };
             req.send(null);
-        },
-
-        //データからロード
-        loadFromData: function(data) {
-            this.vmd = VMDParser(data);
-            this.flare("load");
         },
     });
 
     VMDParser = function(data) {
-        var dv = tm.DataViewEx(data);
+        var dv = phina.DataViewEx(data);
         var vmd = {};
         vmd.metadata = {};
         vmd.metadata.format = 'vmd';
@@ -74,11 +71,5 @@
         }
         return vmd;
     }
-
-    //ローダーに拡張子登録
-    tm.asset.Loader.register("vmd", function(path) {
-        return tm.asset.VMD(path);
-    });
-
-})();
+});
 

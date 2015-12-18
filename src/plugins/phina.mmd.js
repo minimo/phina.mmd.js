@@ -1,12 +1,19 @@
-(function() {
-    tm.asset = tm.asset || {};
+/*
+ * mmd.js
+ */
 
-    tm.define("tm.asset.MMD", {
-        superClass: "tm.event.EventDispatcher",
+phina.namespace(function() {
+    phina.asset = phina.asset || {};
+
+    phina.define("phina.asset.MMD", {
+        superClass: "phina.event.EventDispatcher",
         init: function(path) {
             this.superInit();
-            var modelPath = path[0];
-            var motionPath = path[1];
+        },
+
+        _load: function(resolve) {
+            var modelPath = this.src['pmd'];
+            var motionPath = this.src['vmd'];
 
             var that = this;
             var req = new XMLHttpRequest();
@@ -22,8 +29,8 @@
                 req2.onload = function() {
                     var data2 = req2.response;
                     that.vmd = VMDParser(data2);
-                    that.mesh = tm.hybrid.createThreeMeshFromMMD(that.pmd, that.vmd);
-                    that.flare("load");
+                    that.mesh = phina.hybrid.createThreeMeshFromMMD(that.pmd, that.vmd);
+                    resolve(that);
                 };
                 req2.send(null);
             };
@@ -33,43 +40,43 @@
     });
 
     //ローダーに拡張子登録
-    tm.asset.Loader.register("mmd", function(path) {
-        return tm.asset.MMD(path);
+    phina.asset.Loader.register("mmd", function(path) {
+        return phina.asset.MMD(path);
     });
 
     //ＭＭＤ関連ファイルを統合してメッシュを生成
-    tm.hybrid.createMeshFromMMD = function(pmdName, vmdName) {
-        var asset = tm.asset.Manager.get(pmdName);
+    phina.hybrid.createMeshFromMMD = function(pmdName, vmdName) {
+        var asset = phina.asset.Manager.get(pmdName);
         var pmd = asset.pmd;
         if (!pmd) {
             console.error("アセット'{0}'がないよ".format(pmdName));
             return null;
         }
-        if (!(asset instanceof tm.asset.PMD)) {
+        if (!(asset instanceof phina.asset.PMD)) {
             console.error("アセット'{0}'はPMDじゃないよ".format(pmdName));
             return null;
         }
 
-        var asset = tm.asset.Manager.get(vmdName);
+        var asset = phina.asset.Manager.get(vmdName);
         var vmd = asset.vmd;
         if (!vmd) {
             console.error("アセット'{0}'がないよ".format(vmdName));
             return null;
         }
-        if (!(asset instanceof tm.asset.VMD)) {
+        if (!(asset instanceof phina.asset.VMD)) {
             console.error("アセット'{0}'はVMDじゃないよ".format(vmdName));
             return null;
         }
 
-        var mesh = tm.hybrid.createThreeMeshFromMMD(pmd, vmd);
-        var hybridMesh = tm.hybrid.MMDMesh(mesh);
+        var mesh = phina.hybrid.createThreeMeshFromMMD(pmd, vmd);
+        var hybridMesh = phina.hybrid.MMDMesh(mesh);
         hybridMesh._animation = new THREE.Animation(mesh, mesh.geometry.animation);
         hybridMesh._animation.play();
 
         hybridMesh._morphAnimation = new THREE.MorphAnimation2(mesh, mesh.geometry.morphAnimation);
         hybridMesh._morphAnimation.play();
 
-        hybridMesh._ikSolver = new tm.hybrid.mmd.CCDIKSolver(mesh);
+        hybridMesh._ikSolver = new phina.hybrid.mmd.CCDIKSolver(mesh);
         hybridMesh.on('enterframe', function(e) {
             this._ikSolver.update();
         }.bind(hybridMesh));
@@ -78,7 +85,7 @@
     }
 
     //メタデータからThreeメッシュを生成
-    tm.hybrid.createThreeMeshFromMMD = function(pmd, vmd) {
+    phina.hybrid.createThreeMeshFromMMD = function(pmd, vmd) {
         var texturePath = pmd.texturePath;
 
         var geometry = new THREE.Geometry();
@@ -439,7 +446,7 @@
     }
 
     //CCD法によるIK解決
-    tm.define("tm.hybrid.mmd.CCDIKSolver", {
+    phina.define("phina.hybrid.mmd.CCDIKSolver", {
         init: function(mesh) {
             this.mesh = mesh;
         },
@@ -518,7 +525,7 @@
     });
 
     //DataView拡張
-    tm.define("tm.DataViewEx", {
+    phina.define("phina.DataViewEx", {
         init: function(buffer) {
             // Check Little Endian
             this.littleEndian = ((new Uint8Array((new Uint16Array([0x00ff])).buffer))[0])? true: false;
