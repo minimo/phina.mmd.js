@@ -11,10 +11,15 @@ phina.define('MainScene', {
       width: SCREEN_WIDTH,
       height: SCREEN_HEIGHT
     }).addChildTo(this);
+    layer.renderer.setClearColor(0x000000);
+    layer.scene.remove(layer.light);
+    layer.scene.remove(layer.camera);
+
     layer.camera.position.x = 0;
     layer.camera.position.y = 10;
-    layer.camera.position.z = 30;
-    layer.renderer.setClearColor(0x000000);
+    layer.camera.position.z = 15;
+
+    var ambientLight = phina.three.AmbientLight(0xFFFFFF).addChildTo(layer);
 
     var mesh = phina.three.Mesh('gradriel').addChildTo(layer);
     mesh.update = function() {
