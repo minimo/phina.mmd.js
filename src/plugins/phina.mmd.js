@@ -49,6 +49,23 @@ phina.namespace(function() {
 
     //メタデータからThreeメッシュを生成
     phina.three.createThreeMeshFromMMD = function(pmd, vmd) {
+        var mmd = false;
+        if (typeof(pmd) === "string") {
+            var asset = phina.asset.AssetManager.get('mmd', pmd);
+            if (asset) {
+                mmd = true;
+                pmd = asset.pmd;
+                pmd = asset.vmd;
+            } else {
+                var asset = phina.asset.AssetManager.get('pmd', pmd);
+                pmd = asset.pmd;
+            }
+        }
+        if (!mmd && typeof(vmd) === "string") {
+            var asset = phina.asset.AssetManager.get('vmd', vmd);
+            vmd = asset.vmd;
+        }
+
         var texturePath = pmd.texturePath;
 
         var geometry = new THREE.Geometry();
@@ -413,7 +430,6 @@ phina.namespace(function() {
         } else {
             var mesh = new THREE.Mesh(geometry, material);
         }
-        mesh.position.y = -10;
 
         return mesh;
     }
