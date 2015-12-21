@@ -467,7 +467,7 @@ phina.namespace(function() {
                         this._morphAnimation = new THREE.MorphAnimation2(mesh, mesh.geometry.morphAnimation);
                         this._morphAnimation.play();
 
-                        this._ikSolver = new phina.three.MMD.CCDIKSolver(mesh);
+                        this._ikSolver = phina.three.MMD.CCDIKSolver(mesh);
                         var that = this;
                         this.on('enterframe', function(e) {
                             that._ikSolver.update();
