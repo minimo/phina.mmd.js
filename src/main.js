@@ -27,6 +27,7 @@ phina.define('MainScene', {
 
     //メッシュの追加
     var mesh = phina.three.Mesh('miku_wave').addChildTo(layer);
+    THREE.AnimationHandler.update(0);
 /*
     var pmd = phina.asset.AssetManager.get("pmd", "miku");
     var vmd = phina.asset.AssetManager.get("vmd", "wavefile");
@@ -56,6 +57,10 @@ phina.define('MainScene', {
     label.strokeWidth = 4;
     label.x = this.gridX.center();
     label.y = this.gridY.center();
+  },
+
+  update: function(app) {
+    THREE.AnimationHandler.update(app.deltaTime/1000);
   },
 });
 

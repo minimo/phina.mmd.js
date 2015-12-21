@@ -419,7 +419,7 @@ phina.namespace(function() {
     }
 
     //CCD法によるIK解決
-    phina.define("phina.three.mmd.CCDIKSolver", {
+    phina.define("phina.three.MMD.CCDIKSolver", {
         init: function(mesh) {
             this.mesh = mesh;
         },
