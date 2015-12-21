@@ -457,7 +457,24 @@ phina.namespace(function() {
                         phina.three.Mesh(meshes[i]).addChildTo(this);
                     }
                 } else {
-                    console.error("アセット'{0}'がないよ".format(mesh));
+                    var asset = phina.asset.AssetManager.get("mmd", mesh);
+                    if (asset) {
+                        var mesh = asset.getMesh();
+                        this.superInit(mesh);
+
+                        this._animation = new THREE.Animation(mesh, mesh.geometry.animation);
+                        this._animation.play();
+                        this._morphAnimation = new THREE.MorphAnimation2(mesh, mesh.geometry.morphAnimation);
+                        this._morphAnimation.play();
+
+                        this._ikSolver = new phina.three.mmd.CCDIKSolver(mesh);
+                        var that = this;
+                        this.on('enterframe', function(e) {
+                            that._ikSolver.update();
+                        });
+                    } else {
+                        console.error("アセット'{0}'がないよ".format(mesh));
+                    }
                 }
             } else if (mesh instanceof THREE.Mesh) {
                 this.superInit(mesh);
@@ -469,6 +486,20 @@ phina.namespace(function() {
                 }
             } else {
                 this.superInit(new THREE.Mesh());
+            }
+        },
+
+        playAnimation: function(startTime, weight) {
+            if (this._animation && this._morphAnimation) {
+                this._animation.play(startTime, weight);
+                this._morphAnimation.play(startTime);
+            }
+        },
+
+        stopAnimation: function() {
+            if (this._animation && this._morphAnimation) {
+                this._animation.stop();
+                this._morphAnimation.stop();
             }
         },
     });

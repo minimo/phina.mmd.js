@@ -12,7 +12,7 @@ phina.define('MainScene', {
       width: SCREEN_WIDTH,
       height: SCREEN_HEIGHT
     }).addChildTo(this);
-    layer.renderer.setClearColor(0x000000);
+    layer.renderer.setClearColor(0xB0B0F0);
     layer.scene.remove(layer.light);
 
     //カメラ位置の変更
@@ -24,18 +24,8 @@ phina.define('MainScene', {
     var ambientLight = phina.three.AmbientLight(0xFFFFFF).addChildTo(layer);
     var camera = phina.three.Camera().addChildTo(layer);
 
-    //３Dメッシュをレイヤーに追加
-    var mesh = phina.three.Mesh('gradriel').addChildTo(layer);
-    mesh.update = function() {
-        //ぐるぐる
-        this.rotation.y+=0.02;
-    }
-
-    //Tweenerが使える
-    mesh.tweener.clear()
-      .to({scaleY: 0.9}, 500, "easeOutSine")
-      .to({scaleY: 1}, 500, "easeOutElastic")
-      .setLoop(true);
+    //メッシュの追加
+    var mesh = phina.three.Mesh('miku_wave').addChildTo(this);
 
     // 2Dスプライトも併用可能
     var hiyoko = phina.display.Sprite("hiyoko", 32, 32)
@@ -53,8 +43,7 @@ phina.define('MainScene', {
     hiyoko.vx = 1;
     hiyoko.vy = 1;
 
-
-    var label = phina.display.Label('phina.jsとThree.js\n連携テスト').addChildTo(this);
+    var label = phina.display.Label('WaveFile').addChildTo(this);
     label.fill = 'white';
     label.stroke = 'black';
     label.fontSize = 32;
@@ -70,14 +59,14 @@ phina.main(function() {
       image: {
         'hiyoko': 'assets/hiyoco_nomal_full.png',
       },
-      mqo: {
-        'gradriel': 'assets/gradriel_pose.mqo',
-      },
       mmd: {
-        'miku': {
+        'miku_wave': {
             pmd: 'assets/pmd/miku_v2.pmd',
             vmd: 'assets/vmd/wavefile_v2.vmd',
         },
+      },
+      sound: {
+        'wave_file': 'assets/smile.mp3',
       },
     },
     startLabel: 'main',
