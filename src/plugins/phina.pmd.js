@@ -27,6 +27,11 @@ phina.namespace(function() {
             };
             req.send(null);
         },
+
+        getMesh: function() {
+            var mesh = phina.three.createThreeMeshFromMMD(this.pmd, undefined)
+            return mesh;
+        },
     });
 
     phina.asset.PMD.PMDParser = function(data, path) {

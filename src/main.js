@@ -17,16 +17,22 @@ phina.define('MainScene', {
 
     //カメラ位置の変更
     layer.camera.position.x = 0;
-    layer.camera.position.y = 10;
+    layer.camera.position.y = 0;
     layer.camera.position.z = 15;
 
     //アンビエントライト（環境光）の追加
-    var ambientLight = phina.three.AmbientLight(0xFFFFFF).addChildTo(layer);
+    var ambientLight = phina.three.AmbientLight(0x555555).addChildTo(layer);
     var camera = phina.three.Camera().addChildTo(layer);
 
-    //メッシュの追加
-    var mesh = phina.three.Mesh('miku_wave').addChildTo(this);
 
+    //メッシュの追加
+    var mesh = phina.three.Mesh('miku_wave').addChildTo(layer);
+/*
+    var pmd = phina.asset.AssetManager.get("pmd", "miku");
+    var vmd = phina.asset.AssetManager.get("vmd", "wavefile");
+    var threeMesh = phina.three.createThreeMeshFromMMD(pmd.pmd, vmd.vmd);
+    var mesh = phina.three.Mesh(threeMesh).addChildTo(layer);
+*/
     // 2Dスプライトも併用可能
     var hiyoko = phina.display.Sprite("hiyoko", 32, 32)
       .setScale(3)
@@ -65,8 +71,16 @@ phina.main(function() {
             vmd: 'assets/vmd/wavefile_v2.vmd',
         },
       },
+/*
+      pmd: {
+        'miku': 'assets/pmd/miku_v2.pmd',
+      },
+      vmd: {
+        'wavefile': 'assets/vmd/wavefile_v2.vmd',
+      },
+*/
       sound: {
-        'wave_file': 'assets/smile.mp3',
+        'wavefile': 'assets/smile.mp3',
       },
     },
     startLabel: 'main',

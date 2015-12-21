@@ -16,7 +16,7 @@ phina.namespace(function() {
             this.vmd = null;
             var that = this;
             var req = new XMLHttpRequest();
-            req.open("GET", path, true);
+            req.open("GET", this.src, true);
             req.responseType = "arraybuffer";
             req.onload = function() {
                 var data = req.response;

@@ -32,5 +32,15 @@ phina.namespace(function() {
     var flow = mmd.load(path);
     return flow;
   }
+  phina.asset.AssetLoader.assetLoadFunctions['pmd'] = function(key, path) {
+    var pmd = phina.asset.PMD();
+    var flow = pmd.load(path);
+    return flow;
+  }
+  phina.asset.AssetLoader.assetLoadFunctions['vmd'] = function(key, path) {
+    var vmd = phina.asset.VMD();
+    var flow = vmd.load(path);
+    return flow;
+  }
 });
 
