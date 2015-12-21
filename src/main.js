@@ -56,6 +56,12 @@ phina.define('MainScene', {
     label.strokeWidth = 4;
     label.x = this.gridX.center();
     label.y = this.gridY.center();
+    label.tweener.clear().fadeOut(3000);
+
+    //音楽再生
+    var snd = phina.asset.AssetManager.get("sound", "wavefile");
+    snd.play(false);
+
   },
 
   update: function(app) {
