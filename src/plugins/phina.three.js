@@ -468,10 +468,9 @@ phina.namespace(function() {
                         this._morphAnimation.play();
 
                         this._ikSolver = phina.three.MMD.CCDIKSolver(mesh);
-                        var that = this;
                         this.on('enterframe', function(e) {
-                            that._ikSolver.update();
-                        });
+                            this._ikSolver.update();
+                        }.bind(this));
                     } else {
                         console.error("アセット'{0}'がないよ".format(mesh));
                     }
@@ -485,7 +484,7 @@ phina.namespace(function() {
                     this.superInit(new THREE.Mesh(mesh));
                 }
             } else {
-                this.superInit(new THREE.Mesh());
+               this.superInit(new THREE.Mesh());
             }
         },
 
